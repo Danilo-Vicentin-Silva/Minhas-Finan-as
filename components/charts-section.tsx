@@ -30,7 +30,8 @@ function formatShort(value: number) {
 // ── Donut Chart ───────────────────────────────────────────────────────────────
 
 export function DonutChart() {
-  const { expensesByCategory, totalExpenses } = useFinance()
+  const { expensesByCategory, totalExpenses, profile } = useFinance()
+  const darkMode = profile?.theme !== "light"
 
   if (expensesByCategory.length === 0) {
     return (
@@ -67,11 +68,14 @@ export function DonutChart() {
               <Tooltip
                 formatter={(value: number) => [formatCurrency(value), "Total"]}
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
+                  backgroundColor: darkMode ? "#374151" : "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "0.75rem",
-                  color: "hsl(var(--foreground))",
+                  color: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontSize: "12px",
+                  boxShadow: darkMode
+                    ? "0 4px 6px -1px rgba(0, 0, 0, 0.3)"
+                    : "none",
                 }}
               />
             </PieChart>
@@ -119,7 +123,9 @@ export function IncomeExpenseBarChart() {
     balance,
     salary,
     investmentIncome,
+    profile,
   } = useFinance()
+  const darkMode = profile?.theme !== "light"
 
   const barData = [
     {
@@ -166,7 +172,7 @@ export function IncomeExpenseBarChart() {
                 dataKey="name"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground))",
+                  fill: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontWeight: 600,
                 }}
                 axisLine={false}
@@ -176,7 +182,7 @@ export function IncomeExpenseBarChart() {
                 tickFormatter={formatShort}
                 tick={{
                   fontSize: 10,
-                  fill: "hsl(var(--foreground))",
+                  fill: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontWeight: 600,
                 }}
                 axisLine={false}
@@ -186,11 +192,14 @@ export function IncomeExpenseBarChart() {
               <Tooltip
                 formatter={(value: number) => [formatCurrency(value)]}
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
+                  backgroundColor: darkMode ? "#374151" : "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "0.75rem",
-                  color: "hsl(var(--foreground))",
+                  color: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontSize: "12px",
+                  boxShadow: darkMode
+                    ? "0 4px 6px -1px rgba(0, 0, 0, 0.3)"
+                    : "none",
                 }}
               />
               <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
@@ -223,7 +232,7 @@ export function IncomeExpenseBarChart() {
                 dataKey="name"
                 tick={{
                   fontSize: 11,
-                  fill: "hsl(var(--foreground))",
+                  fill: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontWeight: 600,
                 }}
                 axisLine={false}
@@ -233,7 +242,7 @@ export function IncomeExpenseBarChart() {
                 tickFormatter={formatShort}
                 tick={{
                   fontSize: 10,
-                  fill: "hsl(var(--foreground))",
+                  fill: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontWeight: 600,
                 }}
                 axisLine={false}
@@ -243,17 +252,20 @@ export function IncomeExpenseBarChart() {
               <Tooltip
                 formatter={(value: number) => [formatCurrency(value)]}
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
+                  backgroundColor: darkMode ? "#374151" : "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "0.75rem",
-                  color: "hsl(var(--foreground))",
+                  color: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                   fontSize: "12px",
+                  boxShadow: darkMode
+                    ? "0 4px 6px -1px rgba(0, 0, 0, 0.3)"
+                    : "none",
                 }}
               />
               <Legend
                 wrapperStyle={{
                   fontSize: "11px",
-                  color: "hsl(var(--foreground))",
+                  color: darkMode ? "#ffffff" : "hsl(var(--foreground))",
                 }}
               />
               {/* Receitas */}

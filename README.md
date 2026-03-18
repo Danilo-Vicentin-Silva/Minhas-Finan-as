@@ -1,157 +1,111 @@
 # Minhas Finanças
 
-> Um painel simples e bonito para controlar finanças pessoais com **Next.js**, **Supabase**, e **Tailwind CSS**.
+> Um painel simples e intuitivo para controlar suas finanças pessoais com **Next.js**, **Supabase** e **Tailwind CSS**.
 
 ---
 
-## 📌 Visão geral
+## 📋 Sobre o Projeto
 
-Este projeto é uma aplicação web de controle financeiro pessoal (finanças) com o objetivo de ajudar o usuário a:
+**Minhas Finanças** é uma aplicação web moderna para gestão financeira pessoal. Com ela, você pode:
 
-- Registrar receitas (salário + investimentos)
-- Cadastrar e acompanhar **gastos fixos** e **gastos variáveis**
-- Visualizar gráficos de despesas (pizza / barra)
-- Alternar entre tema claro/escuro
-- Autenticar-se usando **Supabase Auth**
+- 📊 **Registrar receitas**: Salário e rendimentos de investimentos
+- 💳 **Controlar gastos**: Fixos (como aluguel, contas) e variáveis (compras do dia a dia)
+- 📈 **Visualizar gráficos**: Distribuição de despesas por categoria e comparação receita vs. gastos
+- 🌙 **Alternar temas**: Claro ou escuro, salvo no seu perfil
+- 🔐 **Autenticação segura**: Login e cadastro via Supabase
 
-A aplicação usa Next.js (App Router), Supabase (Auth + Postgres), e Tailwind CSS + Radix UI para os componentes.
+Desenvolvido com tecnologias modernas: Next.js (App Router), Supabase (banco de dados e autenticação), Tailwind CSS e componentes acessíveis com Radix UI.
 
 ---
 
-## 🚀 Tecnologias usadas
+## 🚀 Tecnologias Utilizadas
 
-- **Next.js 16 (App Router)**
+- **Next.js 16** (App Router)
 - **React 19**
-- **Supabase** (Auth + Postgres + RLS)
+- **Supabase** (Autenticação + PostgreSQL + RLS)
 - **Tailwind CSS v4**
-- **Radix UI** (componentes acessíveis)
-- **Recharts** (gráficos)
-- **Zod** (validação, quando necessário)
+- **Radix UI** (Componentes acessíveis)
+- **Recharts** (Gráficos interativos)
+- **Zod** (Validação de dados)
 
 ---
 
-## 🧱 Estrutura do projeto
+## 🛠️ Como Usar
 
-Principais pastas e arquivos:
+### Pré-requisitos
 
-- `app/` – rota principal (Next.js App Router)
-  - `app/page.tsx` – dashboard principal
-  - `app/auth/` – páginas de login / cadastro / sucesso
-- `components/` – componentes reutilizáveis (UI, formulários, gráficos, navegação)
-- `lib/` – lógica compartilhada (contexto financeiro, Supabase client, utilitários)
-- `scripts/` – SQL para criação das tabelas e políticas no Supabase
+- Node.js (versão 18 ou superior)
+- Conta no [Supabase](https://supabase.com) (gratuito para começar)
 
----
+### Instalação e Configuração
 
-## ⚙️ Configuração (ambiente)
+1. **Clone o repositório**:
 
-### 1) Clonar o repositório
+   ```bash
+   git clone https://github.com/Danilo-Vicentin-Silva/Minhas-Finan-as.git
+   cd "Minhas Finanças"
+   ```
 
-```bash
-git clone <repo-url>
-cd "Minhas Finanças"
-```
+2. **Instale as dependências** (usando pnpm, recomendado):
 
-### 2) Instalar dependências
+   ```bash
+   npm install -g pnpm  # Se não tiver pnpm
+   pnpm install
+   ```
 
-Este projeto usa **pnpm** (recomendado). Se não tiver, instale:
+3. **Configure o Supabase**:
+   - Crie um projeto gratuito em [supabase.com](https://app.supabase.com)
+   - No painel do Supabase, vá em **Settings > API** e copie:
+     - `Project URL` → será usado como `NEXT_PUBLIC_SUPABASE_URL`
+     - `anon public` key → será usado como `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Execute os scripts SQL em `scripts/` no **SQL Editor** do Supabase (na ordem: `001_create_tables.sql` e `002_add_theme_column.sql`)
 
-```bash
-npm install -g pnpm
-```
+4. **Variáveis de ambiente**:
+   Crie um arquivo `.env.local` na raiz:
 
-Depois:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima-aqui
+   NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/
+   ```
 
-```bash
-pnpm install
-```
-
-### 3) Configurar Supabase
-
-1. Crie um projeto em https://app.supabase.com
-2. No painel do Supabase, copie:
-   - `API URL` → `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` (API Key) → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. (Opcional) Configure o redirect:
-   - `NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL` → `http://localhost:3000/`
-
-### 4) Variáveis de ambiente
-
-Crie um arquivo `.env.local` na raiz do projeto:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=<sua_supabase_url>
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<sua_supabase_anon_key>
-NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/
-```
+5. **Execute o projeto**:
+   ```bash
+   pnpm dev
+   ```
+   Acesse: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🧩 Banco de dados (Supabase)
+## 📦 Deploy
 
-O projeto espera a existência dessas tabelas e políticas (Row Level Security) no banco:
+Para publicar o site, recomendamos o **Vercel** (integração nativa com Next.js):
 
-- `profiles`
-- `fixed_expenses`
-- `variable_expenses`
+1. Conecte seu repositório no [Vercel](https://vercel.com)
+2. Adicione as variáveis de ambiente no painel do Vercel (mesmas do `.env.local`)
+3. Deploy automático!
 
-> O SQL de criação está em `scripts/001_create_tables.sql` e `scripts/002_add_theme_column.sql`.
-
-**Como aplicar**:
-
-1. Acesse o editor SQL do Supabase.
-2. Cole o conteúdo dos arquivos `.sql` (na ordem) e execute.
+Certifique-se de que as tabelas do Supabase estão criadas antes do primeiro acesso.
 
 ---
 
-## ▶️ Rodar em desenvolvimento
+## 📊 Funcionalidades
 
-```bash
-pnpm dev
-```
-
-Acesse: http://localhost:3000
-
----
-
-## ✅ Scripts úteis
-
-| Script       | O que faz                                     |
-| ------------ | --------------------------------------------- |
-| `pnpm dev`   | Inicia o servidor de desenvolvimento          |
-| `pnpm build` | Gera build para produção                      |
-| `pnpm start` | Inicia servidor em modo produção (após build) |
-| `pnpm lint`  | Roda ESLint                                   |
+- ✅ **Autenticação completa**: Login, cadastro e recuperação de senha
+- ✅ **Perfil personalizado**: Nome, salário e investimentos
+- ✅ **Gastos fixos**: Cadastro, edição e marcação de pagamentos
+- ✅ **Gastos variáveis**: Com suporte a parcelas
+- ✅ **Gráficos dinâmicos**: Pizza e barras para análise visual
+- ✅ **Tema adaptável**: Claro/escuro salvo automaticamente
 
 ---
 
-## 🧪 Funcionalidades implementadas
+## 🤝 Contribuição
 
-- Autenticação (login / cadastro) via Supabase
-- Criação e edição de perfil (nome, salário, renda de investimento)
-- Gastos fixos com marcação de pago / não pago
-- Gastos variáveis com parcelas (installments)
-- Gráficos de despesas por categoria e comparação renda vs gastos
-- Tema claro/escuro persistido no perfil do usuário
-
----
-
-## 🛠️ Personalizações fáceis
-
-- Para alterar categorias de despesas: veja `lib/finance-context.tsx` → `CATEGORIES`
-- Para customizar estilos: `app/globals.css` + componentes em `components/ui/`
-
----
-
-## 💡 Próximas ideias (melhorias)
-
-- Adicionar filtros por período (mês/ano)
-- Exportar relatórios em CSV/PDF
-- Permitir várias contas/usuários com multi-tenant
-- Notificações e lembretes de pagamento
+Sinta-se à vontade para abrir issues ou pull requests para melhorias!
 
 ---
 
 ## 📄 Licença
 
-Projeto sem licença definida (use conforme precisar).
+Este projeto é open-source e pode ser usado livremente.
