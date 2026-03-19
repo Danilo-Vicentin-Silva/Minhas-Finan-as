@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { TrendingUp, AlertCircle, ArrowLeft } from "lucide-react"
+import { AlertCircle, ArrowLeft } from "lucide-react"
 
 export default function AuthErrorPage() {
   return (
@@ -7,8 +7,12 @@ export default function AuthErrorPage() {
       <div className="w-full max-w-sm space-y-8 text-center">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
-            <TrendingUp className="w-7 h-7 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Minhas Finanças"
+              className="w-10 h-10 object-contain"
+            />
           </div>
         </div>
 
@@ -17,10 +21,12 @@ export default function AuthErrorPage() {
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
             <AlertCircle className="w-8 h-8 text-destructive" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Algo deu errado</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Algo deu errado
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Ocorreu um erro durante a autenticação. 
-            Por favor, tente novamente ou entre em contato com o suporte.
+            Ocorreu um erro durante a autenticação. Por favor, tente novamente
+            ou entre em contato com o suporte.
           </p>
         </div>
 

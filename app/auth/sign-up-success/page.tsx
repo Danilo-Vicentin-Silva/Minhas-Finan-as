@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { TrendingUp, Mail, ArrowRight } from "lucide-react"
+import { Mail, ArrowRight } from "lucide-react"
 
 export default function SignUpSuccessPage() {
   return (
@@ -7,8 +7,12 @@ export default function SignUpSuccessPage() {
       <div className="w-full max-w-sm space-y-8 text-center">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
-            <TrendingUp className="w-7 h-7 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Minhas Finanças"
+              className="w-10 h-10 object-contain"
+            />
           </div>
         </div>
 
@@ -17,10 +21,12 @@ export default function SignUpSuccessPage() {
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
             <Mail className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Verifique seu email</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Verifique seu email
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Enviamos um link de confirmação para o seu email. 
-            Clique no link para ativar sua conta e começar a usar o FinanceApp.
+            Enviamos um link de confirmação para o seu email. Clique no link
+            para ativar sua conta e começar a usar o FinanceApp.
           </p>
         </div>
 

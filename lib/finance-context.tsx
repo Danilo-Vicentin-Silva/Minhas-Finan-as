@@ -1,6 +1,13 @@
 "use client"
 
-import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from "react"
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
@@ -12,6 +19,15 @@ export type Category =
   | "lazer"
   | "educacao"
   | "roupas"
+  | "entretenimento"
+  | "viagem"
+  | "seguros"
+  | "beleza"
+  | "tecnologia"
+  | "servicos"
+  | "impostos"
+  | "doacoes"
+  | "investimentos"
   | "outros"
 
 export const CATEGORIES: Record<Category, { label: string; color: string }> = {
@@ -22,6 +38,15 @@ export const CATEGORIES: Record<Category, { label: string; color: string }> = {
   lazer: { label: "Lazer", color: "#a78bfa" },
   educacao: { label: "Educação", color: "#34d399" },
   roupas: { label: "Roupas", color: "#fb923c" },
+  entretenimento: { label: "Entretenimento", color: "#ec4899" },
+  viagem: { label: "Viagem", color: "#8b5cf6" },
+  seguros: { label: "Seguros", color: "#06b6d4" },
+  beleza: { label: "Beleza", color: "#f97316" },
+  tecnologia: { label: "Tecnologia", color: "#10b981" },
+  servicos: { label: "Serviços", color: "#6366f1" },
+  impostos: { label: "Impostos", color: "#ef4444" },
+  doacoes: { label: "Doações", color: "#84cc16" },
+  investimentos: { label: "Investimentos", color: "#fbbf24" },
   outros: { label: "Outros", color: "#94a3b8" },
 }
 
@@ -69,7 +94,10 @@ interface FinanceContextType {
   removeFixedExpense: (id: string) => void
   toggleFixedExpensePaid: (id: string) => void
   addVariableExpense: (expense: Omit<VariableExpense, "id">) => void
-  addVariableExpenseWithInstallments: (expense: Omit<VariableExpense, "id" | "installment">, installments: number) => void
+  addVariableExpenseWithInstallments: (
+    expense: Omit<VariableExpense, "id" | "installment">,
+    installments: number,
+  ) => void
   updateVariableExpense: (id: string, updates: Partial<VariableExpense>) => void
   removeVariableExpense: (id: string) => void
   setProfileName: (name: string) => void
@@ -80,7 +108,12 @@ interface FinanceContextType {
   totalVariableExpenses: number
   totalExpenses: number
   balance: number
-  expensesByCategory: { category: Category; label: string; amount: number; color: string }[]
+  expensesByCategory: {
+    category: Category
+    label: string
+    amount: number
+    color: string
+  }[]
   isHydrated: boolean
   isLoading: boolean
 }
@@ -91,7 +124,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([])
-  const [variableExpenses, setVariableExpenses] = useState<VariableExpense[]>([])
+  const [variableExpenses, setVariableExpenses] = useState<VariableExpense[]>(
+    [],
+  )
   const [isHydrated, setIsHydrated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -101,8 +136,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadData() {
       setIsLoading(true)
-      
-      const { data: { user } } = await supabase.auth.getUser()
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       setUser(user)
 
       if (user) {
@@ -131,14 +168,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           .order("due_day", { ascending: true })
 
         if (fixedData) {
-          setFixedExpenses(fixedData.map(e => ({
-            id: e.id,
-            name: e.name,
-            amount: e.amount,
-            category: e.category as Category,
-            paid: e.paid,
-            dueDay: e.due_day,
-          })))
+          setFixedExpenses(
+            fixedData.map((e) => ({
+              id: e.id,
+              name: e.name,
+              amount: e.amount,
+              category: e.category as Category,
+              paid: e.paid,
+              dueDay: e.due_day,
+            })),
+          )
         }
 
         // Load variable expenses
@@ -149,18 +188,22 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           .order("date", { ascending: false })
 
         if (variableData) {
-          setVariableExpenses(variableData.map(e => ({
-            id: e.id,
-            name: e.name,
-            amount: e.amount,
-            category: e.category as Category,
-            date: e.date,
-            description: e.description || undefined,
-            installment: e.installment_total ? {
-              total: e.installment_total,
-              current: e.installment_current || 1,
-            } : undefined,
-          })))
+          setVariableExpenses(
+            variableData.map((e) => ({
+              id: e.id,
+              name: e.name,
+              amount: e.amount,
+              category: e.category as Category,
+              date: e.date,
+              description: e.description || undefined,
+              installment: e.installment_total
+                ? {
+                    total: e.installment_total,
+                    current: e.installment_current || 1,
+                  }
+                : undefined,
+            })),
+          )
         }
       }
 
@@ -171,7 +214,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     loadData()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (!session?.user) {
         setProfile(null)
@@ -183,157 +228,194 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const setSalary = useCallback(async (value: number) => {
-    if (!user) return
-    setProfile(p => p ? { ...p, salary: value } : null)
-    await supabase
-      .from("profiles")
-      .update({ salary: value })
-      .eq("id", user.id)
-  }, [user, supabase])
+  const setSalary = useCallback(
+    async (value: number) => {
+      if (!user) return
+      setProfile((p) => (p ? { ...p, salary: value } : null))
+      await supabase
+        .from("profiles")
+        .update({ salary: value })
+        .eq("id", user.id)
+    },
+    [user, supabase],
+  )
 
-  const setInvestmentIncome = useCallback(async (value: number) => {
-    if (!user) return
-    setProfile(p => p ? { ...p, investment_income: value } : null)
-    await supabase
-      .from("profiles")
-      .update({ investment_income: value })
-      .eq("id", user.id)
-  }, [user, supabase])
+  const setInvestmentIncome = useCallback(
+    async (value: number) => {
+      if (!user) return
+      setProfile((p) => (p ? { ...p, investment_income: value } : null))
+      await supabase
+        .from("profiles")
+        .update({ investment_income: value })
+        .eq("id", user.id)
+    },
+    [user, supabase],
+  )
 
-  const setProfileName = useCallback(async (name: string) => {
-    if (!user) return
-    setProfile(p => p ? { ...p, name } : null)
-    await supabase
-      .from("profiles")
-      .update({ name })
-      .eq("id", user.id)
-  }, [user, supabase])
+  const setProfileName = useCallback(
+    async (name: string) => {
+      if (!user) return
+      setProfile((p) => (p ? { ...p, name } : null))
+      await supabase.from("profiles").update({ name }).eq("id", user.id)
+    },
+    [user, supabase],
+  )
 
-  const setTheme = useCallback(async (theme: "light" | "dark") => {
-    if (!user) return
-    setProfile(p => p ? { ...p, theme } : null)
-    await supabase
-      .from("profiles")
-      .update({ theme })
-      .eq("id", user.id)
-  }, [user, supabase])
+  const setTheme = useCallback(
+    async (theme: "light" | "dark") => {
+      if (!user) return
+      setProfile((p) => (p ? { ...p, theme } : null))
+      await supabase.from("profiles").update({ theme }).eq("id", user.id)
+    },
+    [user, supabase],
+  )
 
-  const addFixedExpense = useCallback(async (expense: Omit<FixedExpense, "id">) => {
-    if (!user) return
-    const { data } = await supabase
-      .from("fixed_expenses")
-      .insert({
-        user_id: user.id,
-        name: expense.name,
-        amount: expense.amount,
-        category: expense.category,
-        paid: expense.paid,
-        due_day: expense.dueDay,
-      })
-      .select()
-      .single()
+  const addFixedExpense = useCallback(
+    async (expense: Omit<FixedExpense, "id">) => {
+      if (!user) return
+      const { data } = await supabase
+        .from("fixed_expenses")
+        .insert({
+          user_id: user.id,
+          name: expense.name,
+          amount: expense.amount,
+          category: expense.category,
+          paid: expense.paid,
+          due_day: expense.dueDay,
+        })
+        .select()
+        .single()
 
-    if (data) {
-      setFixedExpenses(prev => [...prev, {
-        id: data.id,
-        name: data.name,
-        amount: data.amount,
-        category: data.category as Category,
-        paid: data.paid,
-        dueDay: data.due_day,
-      }])
-    }
-  }, [user, supabase])
+      if (data) {
+        setFixedExpenses((prev) => [
+          ...prev,
+          {
+            id: data.id,
+            name: data.name,
+            amount: data.amount,
+            category: data.category as Category,
+            paid: data.paid,
+            dueDay: data.due_day,
+          },
+        ])
+      }
+    },
+    [user, supabase],
+  )
 
-  const updateFixedExpense = useCallback(async (id: string, updates: Partial<FixedExpense>) => {
-    if (!user) return
-    setFixedExpenses(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e))
-    
-    const dbUpdates: Record<string, unknown> = {}
-    if (updates.name !== undefined) dbUpdates.name = updates.name
-    if (updates.amount !== undefined) dbUpdates.amount = updates.amount
-    if (updates.category !== undefined) dbUpdates.category = updates.category
-    if (updates.paid !== undefined) dbUpdates.paid = updates.paid
-    if (updates.dueDay !== undefined) dbUpdates.due_day = updates.dueDay
+  const updateFixedExpense = useCallback(
+    async (id: string, updates: Partial<FixedExpense>) => {
+      if (!user) return
+      setFixedExpenses((prev) =>
+        prev.map((e) => (e.id === id ? { ...e, ...updates } : e)),
+      )
 
-    await supabase
-      .from("fixed_expenses")
-      .update(dbUpdates)
-      .eq("id", id)
-      .eq("user_id", user.id)
-  }, [user, supabase])
+      const dbUpdates: Record<string, unknown> = {}
+      if (updates.name !== undefined) dbUpdates.name = updates.name
+      if (updates.amount !== undefined) dbUpdates.amount = updates.amount
+      if (updates.category !== undefined) dbUpdates.category = updates.category
+      if (updates.paid !== undefined) dbUpdates.paid = updates.paid
+      if (updates.dueDay !== undefined) dbUpdates.due_day = updates.dueDay
 
-  const removeFixedExpense = useCallback(async (id: string) => {
-    if (!user) return
-    setFixedExpenses(prev => prev.filter(e => e.id !== id))
-    await supabase
-      .from("fixed_expenses")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", user.id)
-  }, [user, supabase])
+      await supabase
+        .from("fixed_expenses")
+        .update(dbUpdates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+    },
+    [user, supabase],
+  )
 
-  const toggleFixedExpensePaid = useCallback(async (id: string) => {
-    if (!user) return
-    const expense = fixedExpenses.find(e => e.id === id)
-    if (!expense) return
-    
-    const newPaid = !expense.paid
-    setFixedExpenses(prev => prev.map(e => e.id === id ? { ...e, paid: newPaid } : e))
-    
-    await supabase
-      .from("fixed_expenses")
-      .update({ paid: newPaid })
-      .eq("id", id)
-      .eq("user_id", user.id)
-  }, [user, fixedExpenses, supabase])
+  const removeFixedExpense = useCallback(
+    async (id: string) => {
+      if (!user) return
+      setFixedExpenses((prev) => prev.filter((e) => e.id !== id))
+      await supabase
+        .from("fixed_expenses")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id)
+    },
+    [user, supabase],
+  )
 
-  const addVariableExpense = useCallback(async (expense: Omit<VariableExpense, "id">) => {
-    if (!user) return
-    const { data } = await supabase
-      .from("variable_expenses")
-      .insert({
-        user_id: user.id,
-        name: expense.name,
-        amount: expense.amount,
-        category: expense.category,
-        date: expense.date,
-        description: expense.description || null,
-        installment_total: expense.installment?.total || null,
-        installment_current: expense.installment?.current || null,
-      })
-      .select()
-      .single()
+  const toggleFixedExpensePaid = useCallback(
+    async (id: string) => {
+      if (!user) return
+      const expense = fixedExpenses.find((e) => e.id === id)
+      if (!expense) return
 
-    if (data) {
-      setVariableExpenses(prev => [{
-        id: data.id,
-        name: data.name,
-        amount: data.amount,
-        category: data.category as Category,
-        date: data.date,
-        description: data.description || undefined,
-        installment: data.installment_total ? {
-          total: data.installment_total,
-          current: data.installment_current || 1,
-        } : undefined,
-      }, ...prev])
-    }
-  }, [user, supabase])
+      const newPaid = !expense.paid
+      setFixedExpenses((prev) =>
+        prev.map((e) => (e.id === id ? { ...e, paid: newPaid } : e)),
+      )
+
+      await supabase
+        .from("fixed_expenses")
+        .update({ paid: newPaid })
+        .eq("id", id)
+        .eq("user_id", user.id)
+    },
+    [user, fixedExpenses, supabase],
+  )
+
+  const addVariableExpense = useCallback(
+    async (expense: Omit<VariableExpense, "id">) => {
+      if (!user) return
+      const { data } = await supabase
+        .from("variable_expenses")
+        .insert({
+          user_id: user.id,
+          name: expense.name,
+          amount: expense.amount,
+          category: expense.category,
+          date: expense.date,
+          description: expense.description || null,
+          installment_total: expense.installment?.total || null,
+          installment_current: expense.installment?.current || null,
+        })
+        .select()
+        .single()
+
+      if (data) {
+        setVariableExpenses((prev) => [
+          {
+            id: data.id,
+            name: data.name,
+            amount: data.amount,
+            category: data.category as Category,
+            date: data.date,
+            description: data.description || undefined,
+            installment: data.installment_total
+              ? {
+                  total: data.installment_total,
+                  current: data.installment_current || 1,
+                }
+              : undefined,
+          },
+          ...prev,
+        ])
+      }
+    },
+    [user, supabase],
+  )
 
   const addVariableExpenseWithInstallments = useCallback(
-    async (expense: Omit<VariableExpense, "id" | "installment">, installments: number) => {
+    async (
+      expense: Omit<VariableExpense, "id" | "installment">,
+      installments: number,
+    ) => {
       if (!user) return
       const totalAmount = expense.amount
-      const installmentAmount = Math.round((totalAmount / installments) * 100) / 100
+      const installmentAmount =
+        Math.round((totalAmount / installments) * 100) / 100
       const baseDate = new Date(expense.date)
-      
+
       const toInsert = []
       for (let i = 0; i < installments; i++) {
         const installmentDate = new Date(baseDate)
         installmentDate.setMonth(installmentDate.getMonth() + i)
-        
+
         toInsert.push({
           user_id: user.id,
           name: `${expense.name} (${i + 1}/${installments})`,
@@ -352,51 +434,62 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         .select()
 
       if (data) {
-        const newExpenses = data.map(e => ({
+        const newExpenses = data.map((e) => ({
           id: e.id,
           name: e.name,
           amount: e.amount,
           category: e.category as Category,
           date: e.date,
           description: e.description || undefined,
-          installment: e.installment_total ? {
-            total: e.installment_total,
-            current: e.installment_current || 1,
-          } : undefined,
+          installment: e.installment_total
+            ? {
+                total: e.installment_total,
+                current: e.installment_current || 1,
+              }
+            : undefined,
         }))
-        setVariableExpenses(prev => [...newExpenses, ...prev])
+        setVariableExpenses((prev) => [...newExpenses, ...prev])
       }
     },
-    [user, supabase]
+    [user, supabase],
   )
 
-  const updateVariableExpense = useCallback(async (id: string, updates: Partial<VariableExpense>) => {
-    if (!user) return
-    setVariableExpenses(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e))
-    
-    const dbUpdates: Record<string, unknown> = {}
-    if (updates.name !== undefined) dbUpdates.name = updates.name
-    if (updates.amount !== undefined) dbUpdates.amount = updates.amount
-    if (updates.category !== undefined) dbUpdates.category = updates.category
-    if (updates.date !== undefined) dbUpdates.date = updates.date
-    if (updates.description !== undefined) dbUpdates.description = updates.description
+  const updateVariableExpense = useCallback(
+    async (id: string, updates: Partial<VariableExpense>) => {
+      if (!user) return
+      setVariableExpenses((prev) =>
+        prev.map((e) => (e.id === id ? { ...e, ...updates } : e)),
+      )
 
-    await supabase
-      .from("variable_expenses")
-      .update(dbUpdates)
-      .eq("id", id)
-      .eq("user_id", user.id)
-  }, [user, supabase])
+      const dbUpdates: Record<string, unknown> = {}
+      if (updates.name !== undefined) dbUpdates.name = updates.name
+      if (updates.amount !== undefined) dbUpdates.amount = updates.amount
+      if (updates.category !== undefined) dbUpdates.category = updates.category
+      if (updates.date !== undefined) dbUpdates.date = updates.date
+      if (updates.description !== undefined)
+        dbUpdates.description = updates.description
 
-  const removeVariableExpense = useCallback(async (id: string) => {
-    if (!user) return
-    setVariableExpenses(prev => prev.filter(e => e.id !== id))
-    await supabase
-      .from("variable_expenses")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", user.id)
-  }, [user, supabase])
+      await supabase
+        .from("variable_expenses")
+        .update(dbUpdates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+    },
+    [user, supabase],
+  )
+
+  const removeVariableExpense = useCallback(
+    async (id: string) => {
+      if (!user) return
+      setVariableExpenses((prev) => prev.filter((e) => e.id !== id))
+      await supabase
+        .from("variable_expenses")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id)
+    },
+    [user, supabase],
+  )
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()
@@ -404,25 +497,28 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const totalIncome = useMemo(
     () => (profile?.salary || 0) + (profile?.investment_income || 0),
-    [profile]
+    [profile],
   )
 
   const totalFixedExpenses = useMemo(
     () => fixedExpenses.reduce((acc, e) => acc + e.amount, 0),
-    [fixedExpenses]
+    [fixedExpenses],
   )
 
   const totalVariableExpenses = useMemo(
     () => variableExpenses.reduce((acc, e) => acc + e.amount, 0),
-    [variableExpenses]
+    [variableExpenses],
   )
 
   const totalExpenses = useMemo(
     () => totalFixedExpenses + totalVariableExpenses,
-    [totalFixedExpenses, totalVariableExpenses]
+    [totalFixedExpenses, totalVariableExpenses],
   )
 
-  const balance = useMemo(() => totalIncome - totalExpenses, [totalIncome, totalExpenses])
+  const balance = useMemo(
+    () => totalIncome - totalExpenses,
+    [totalIncome, totalExpenses],
+  )
 
   const expensesByCategory = useMemo(() => {
     const map = new Map<Category, number>()

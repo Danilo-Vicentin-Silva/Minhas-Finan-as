@@ -26,11 +26,23 @@ import {
   ChevronUp,
   Pencil,
   CreditCard,
+  Film,
+  Plane,
+  Shield,
+  Sparkles,
+  Monitor,
+  Wrench,
+  Receipt,
+  HeartHandshake,
+  TrendingUp,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value)
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value)
 }
 
 const CATEGORY_ICONS: Record<Category, React.ReactNode> = {
@@ -41,6 +53,15 @@ const CATEGORY_ICONS: Record<Category, React.ReactNode> = {
   lazer: <Gamepad2 size={14} />,
   educacao: <BookOpen size={14} />,
   roupas: <ShoppingBag size={14} />,
+  entretenimento: <Film size={14} />,
+  viagem: <Plane size={14} />,
+  seguros: <Shield size={14} />,
+  beleza: <Sparkles size={14} />,
+  tecnologia: <Monitor size={14} />,
+  servicos: <Wrench size={14} />,
+  impostos: <Receipt size={14} />,
+  doacoes: <HeartHandshake size={14} />,
+  investimentos: <TrendingUp size={14} />,
   outros: <MoreHorizontal size={14} />,
 }
 
@@ -54,14 +75,29 @@ interface AddFixedFormData {
 }
 
 export function FixedExpensesSection() {
-  const { fixedExpenses, totalFixedExpenses, addFixedExpense, removeFixedExpense, toggleFixedExpensePaid } = useFinance()
+  const {
+    fixedExpenses,
+    totalFixedExpenses,
+    addFixedExpense,
+    removeFixedExpense,
+    toggleFixedExpensePaid,
+  } = useFinance()
   const [showForm, setShowForm] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<Category | "all">(
+    "all",
+  )
   const [form, setForm] = useState<AddFixedFormData>({
     name: "",
     amount: "",
     category: "moradia",
     dueDay: "5",
   })
+
+  // Filter expenses by category
+  const filteredExpenses =
+    selectedCategory === "all"
+      ? fixedExpenses
+      : fixedExpenses.filter((expense) => expense.category === selectedCategory)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -79,7 +115,7 @@ export function FixedExpensesSection() {
     setShowForm(false)
   }
 
-  const paidCount = fixedExpenses.filter((e) => e.paid).length
+  const paidCount = filteredExpenses.filter((e) => e.paid).length
 
   return (
     <div className="px-3 sm:px-4 pb-4">
@@ -89,7 +125,10 @@ export function FixedExpensesSection() {
             Gastos Fixos
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {paidCount}/{fixedExpenses.length} pagos · {formatCurrency(totalFixedExpenses)}
+            {paidCount}/{filteredExpenses.length} pagos ·{" "}
+            {formatCurrency(
+              filteredExpenses.reduce((sum, e) => sum + e.amount, 0),
+            )}
           </p>
         </div>
         <button
@@ -97,12 +136,35 @@ export function FixedExpensesSection() {
           className="p-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 transition-colors"
           aria-label="Adicionar gasto fixo"
         >
-          {showForm ? <X size={16} /> : <Plus size={16} />}
+          {showForm ? <X size={16} /> : <Plus size={16} />}{" "}
         </button>
       </div>
 
+      {/* Category filter */}
+      <div className="mb-3">
+        <select
+          value={selectedCategory}
+          onChange={(e) =>
+            setSelectedCategory(e.target.value as Category | "all")
+          }
+          className="w-full bg-secondary rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value="all">Todas as categorias</option>
+          {(Object.entries(CATEGORIES) as [Category, { label: string }][]).map(
+            ([k, v]) => (
+              <option key={k} value={k}>
+                {v.label}
+              </option>
+            ),
+          )}
+        </select>
+      </div>
+
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-xl border border-primary/30 bg-card p-4 mb-3 space-y-3">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-xl border border-primary/30 bg-card p-4 mb-3 space-y-3"
+        >
           <p className="text-sm font-medium text-foreground">Novo Gasto Fixo</p>
           <div className="space-y-2">
             <input
@@ -136,11 +198,17 @@ export function FixedExpensesSection() {
             </div>
             <select
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
+              onChange={(e) =>
+                setForm({ ...form, category: e.target.value as Category })
+              }
               className="w-full bg-secondary rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
             >
-              {(Object.entries(CATEGORIES) as [Category, { label: string }][]).map(([k, v]) => (
-                <option key={k} value={k}>{v.label}</option>
+              {(
+                Object.entries(CATEGORIES) as [Category, { label: string }][]
+              ).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v.label}
+                </option>
               ))}
             </select>
           </div>
@@ -154,7 +222,7 @@ export function FixedExpensesSection() {
       )}
 
       <div className="space-y-2">
-        {fixedExpenses.map((expense) => (
+        {filteredExpenses.map((expense) => (
           <FixedExpenseItem
             key={expense.id}
             expense={expense}
@@ -162,9 +230,11 @@ export function FixedExpensesSection() {
             onRemove={() => removeFixedExpense(expense.id)}
           />
         ))}
-        {fixedExpenses.length === 0 && (
+        {filteredExpenses.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-6">
-            Nenhum gasto fixo cadastrado.
+            {selectedCategory === "all"
+              ? "Nenhum gasto fixo cadastrado."
+              : `Nenhum gasto encontrado na categoria ${CATEGORIES[selectedCategory].label.toLowerCase()}.`}
           </p>
         )}
       </div>
@@ -187,7 +257,7 @@ function FixedExpenseItem({
     <div
       className={cn(
         "flex items-center gap-3 rounded-xl bg-card border border-border p-3.5 transition-all",
-        expense.paid && "opacity-60"
+        expense.paid && "opacity-60",
       )}
     >
       {/* Category badge */}
@@ -200,7 +270,12 @@ function FixedExpenseItem({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className={cn("text-sm font-medium text-foreground truncate", expense.paid && "line-through")}>
+        <p
+          className={cn(
+            "text-sm font-medium text-foreground truncate",
+            expense.paid && "line-through",
+          )}
+        >
           {expense.name}
         </p>
         <p className="text-xs text-muted-foreground">
@@ -209,7 +284,9 @@ function FixedExpenseItem({
       </div>
 
       {/* Amount */}
-      <p className="text-sm font-semibold text-foreground shrink-0">{formatCurrency(expense.amount)}</p>
+      <p className="text-sm font-semibold text-foreground shrink-0">
+        {formatCurrency(expense.amount)}
+      </p>
 
       {/* Toggle paid */}
       <button
@@ -218,11 +295,13 @@ function FixedExpenseItem({
           "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
           expense.paid
             ? "bg-primary border-primary"
-            : "border-border hover:border-primary"
+            : "border-border hover:border-primary",
         )}
         aria-label={expense.paid ? "Marcar como não pago" : "Marcar como pago"}
       >
-        {expense.paid && <Check size={12} className="text-primary-foreground" />}
+        {expense.paid && (
+          <Check size={12} className="text-primary-foreground" />
+        )}
       </button>
 
       {/* Remove */}
@@ -240,12 +319,30 @@ function FixedExpenseItem({
 // ── Variable Expenses ─────────────────────────────────────────────────────────
 
 export function VariableExpensesSection() {
-  const { variableExpenses, totalVariableExpenses, removeVariableExpense, updateVariableExpense } = useFinance()
-  const [editingExpense, setEditingExpense] = useState<VariableExpense | null>(null)
+  const {
+    variableExpenses,
+    totalVariableExpenses,
+    removeVariableExpense,
+    updateVariableExpense,
+  } = useFinance()
+  const [editingExpense, setEditingExpense] = useState<VariableExpense | null>(
+    null,
+  )
   const [expanded, setExpanded] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<Category | "all">(
+    "all",
+  )
 
-  // Show only 5 most recent by default
-  const displayed = expanded ? variableExpenses : variableExpenses.slice(0, 5)
+  // Filter expenses by category
+  const filteredExpenses =
+    selectedCategory === "all"
+      ? variableExpenses
+      : variableExpenses.filter(
+          (expense) => expense.category === selectedCategory,
+        )
+
+  // Show only 5 most recent by default (from filtered expenses)
+  const displayed = expanded ? filteredExpenses : filteredExpenses.slice(0, 5)
 
   return (
     <div className="px-3 sm:px-4 pb-4">
@@ -255,21 +352,48 @@ export function VariableExpensesSection() {
             Gastos Variáveis
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {variableExpenses.length} lançamentos · {formatCurrency(totalVariableExpenses)}
+            {filteredExpenses.length} lançamentos ·{" "}
+            {formatCurrency(
+              filteredExpenses.reduce((sum, e) => sum + e.amount, 0),
+            )}
           </p>
         </div>
-        {variableExpenses.length > 5 && (
+        {filteredExpenses.length > 5 && (
           <button
             onClick={() => setExpanded(!expanded)}
             className="text-xs text-primary flex items-center gap-1"
           >
             {expanded ? (
-              <><ChevronUp size={14} /> Ver menos</>
+              <>
+                <ChevronUp size={14} /> Ver menos
+              </>
             ) : (
-              <><ChevronDown size={14} /> Ver todos</>
+              <>
+                <ChevronDown size={14} /> Ver todos
+              </>
             )}
           </button>
         )}
+      </div>
+
+      {/* Category filter */}
+      <div className="mb-3">
+        <select
+          value={selectedCategory}
+          onChange={(e) =>
+            setSelectedCategory(e.target.value as Category | "all")
+          }
+          className="w-full bg-secondary rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value="all">Todas as categorias</option>
+          {(Object.entries(CATEGORIES) as [Category, { label: string }][]).map(
+            ([k, v]) => (
+              <option key={k} value={k}>
+                {v.label}
+              </option>
+            ),
+          )}
+        </select>
       </div>
 
       <div className="space-y-2">
@@ -281,9 +405,11 @@ export function VariableExpensesSection() {
             onEdit={() => setEditingExpense(expense)}
           />
         ))}
-        {variableExpenses.length === 0 && (
+        {filteredExpenses.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-6">
-            Nenhum gasto variável registrado.
+            {selectedCategory === "all"
+              ? "Nenhum gasto variável registrado."
+              : `Nenhum gasto encontrado na categoria ${CATEGORIES[selectedCategory].label.toLowerCase()}.`}
           </p>
         )}
       </div>
@@ -314,7 +440,10 @@ function VariableExpenseItem({
 }) {
   const color = CATEGORIES[expense.category].color
   const date = new Date(expense.date + "T00:00:00")
-  const formatted = date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+  const formatted = date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+  })
 
   return (
     <div className="flex items-center gap-3 rounded-xl bg-card border border-border p-3 sm:p-3.5">
@@ -326,7 +455,9 @@ function VariableExpenseItem({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <p className="text-sm font-medium text-foreground truncate">{expense.name}</p>
+          <p className="text-sm font-medium text-foreground truncate">
+            {expense.name}
+          </p>
           {expense.installment && (
             <span className="text-[10px] font-medium text-primary bg-primary/15 px-1.5 py-0.5 rounded">
               {expense.installment.current}/{expense.installment.total}
@@ -338,7 +469,9 @@ function VariableExpenseItem({
           {formatted} · {CATEGORIES[expense.category].label}
         </p>
       </div>
-      <p className="text-sm font-semibold text-foreground shrink-0">{formatCurrency(expense.amount)}</p>
+      <p className="text-sm font-semibold text-foreground shrink-0">
+        {formatCurrency(expense.amount)}
+      </p>
       <button
         onClick={onEdit}
         className="text-muted-foreground hover:text-primary transition-colors shrink-0"
@@ -391,11 +524,19 @@ function EditVariableExpenseModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 sm:p-6 max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-semibold text-foreground">Editar Gasto</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <h3 className="text-base font-semibold text-foreground">
+            Editar Gasto
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X size={20} />
           </button>
         </div>
@@ -429,11 +570,17 @@ function EditVariableExpenseModal({
           </div>
           <select
             value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
+            onChange={(e) =>
+              setForm({ ...form, category: e.target.value as Category })
+            }
             className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
           >
-            {(Object.entries(CATEGORIES) as [Category, { label: string }][]).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
+            {(
+              Object.entries(CATEGORIES) as [Category, { label: string }][]
+            ).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v.label}
+              </option>
             ))}
           </select>
           <input
@@ -458,7 +605,8 @@ function EditVariableExpenseModal({
 // ── FAB (Floating Action Button) ─────────────────────────────────────────────
 
 export function FABAddExpense() {
-  const { addVariableExpense, addVariableExpenseWithInstallments } = useFinance()
+  const { addVariableExpense, addVariableExpenseWithInstallments } =
+    useFinance()
   const [open, setOpen] = useState(false)
   const [isInstallment, setIsInstallment] = useState(false)
   const [form, setForm] = useState({
@@ -474,7 +622,7 @@ export function FABAddExpense() {
     e.preventDefault()
     const amount = parseFloat(form.amount.replace(",", "."))
     if (!form.name || isNaN(amount) || amount <= 0) return
-    
+
     const installments = parseInt(form.installments)
     if (isInstallment && installments > 1 && installments <= 12) {
       addVariableExpenseWithInstallments(
@@ -485,7 +633,7 @@ export function FABAddExpense() {
           date: form.date,
           description: form.description || undefined,
         },
-        installments
+        installments,
       )
     } else {
       addVariableExpense({
@@ -496,7 +644,7 @@ export function FABAddExpense() {
         description: form.description || undefined,
       })
     }
-    
+
     setForm({
       name: "",
       amount: "",
@@ -523,7 +671,9 @@ export function FABAddExpense() {
       {open && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 sm:p-6 max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-base font-semibold text-foreground">Registrar Gasto</h3>
+            <h3 className="text-base font-semibold text-foreground">
+              Registrar Gasto
+            </h3>
             <button
               onClick={() => setOpen(false)}
               className="text-muted-foreground hover:text-foreground"
@@ -561,11 +711,17 @@ export function FABAddExpense() {
             </div>
             <select
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
+              onChange={(e) =>
+                setForm({ ...form, category: e.target.value as Category })
+              }
               className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
             >
-              {(Object.entries(CATEGORIES) as [Category, { label: string }][]).map(([k, v]) => (
-                <option key={k} value={k}>{v.label}</option>
+              {(
+                Object.entries(CATEGORIES) as [Category, { label: string }][]
+              ).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v.label}
+                </option>
               ))}
             </select>
 
@@ -580,7 +736,7 @@ export function FABAddExpense() {
                 onClick={() => setIsInstallment(!isInstallment)}
                 className={cn(
                   "relative w-10 h-5 rounded-full transition-colors duration-200",
-                  isInstallment ? "bg-primary" : "bg-muted"
+                  isInstallment ? "bg-primary" : "bg-muted",
                 )}
                 role="switch"
                 aria-checked={isInstallment}
@@ -588,7 +744,7 @@ export function FABAddExpense() {
                 <span
                   className={cn(
                     "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200",
-                    isInstallment && "translate-x-5"
+                    isInstallment && "translate-x-5",
                   )}
                 />
               </button>
@@ -599,11 +755,17 @@ export function FABAddExpense() {
                 <span className="text-sm text-muted-foreground">Parcelas:</span>
                 <select
                   value={form.installments}
-                  onChange={(e) => setForm({ ...form, installments: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, installments: e.target.value })
+                  }
                   className="flex-1 bg-secondary rounded-lg px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-                    <option key={n} value={n}>{n}x {form.amount && `de ${formatCurrency(parseFloat(form.amount.replace(",", ".")) / n)}`}</option>
+                    <option key={n} value={n}>
+                      {n}x{" "}
+                      {form.amount &&
+                        `de ${formatCurrency(parseFloat(form.amount.replace(",", ".")) / n)}`}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -613,15 +775,17 @@ export function FABAddExpense() {
               type="text"
               placeholder="Descrição (opcional)"
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               className="w-full bg-secondary rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
             />
             <button
               type="submit"
               className="w-full bg-primary text-primary-foreground rounded-xl py-3.5 text-sm font-semibold hover:bg-primary/90 transition-colors mt-1"
             >
-              {isInstallment && parseInt(form.installments) > 1 
-                ? `Registrar em ${form.installments}x` 
+              {isInstallment && parseInt(form.installments) > 1
+                ? `Registrar em ${form.installments}x`
                 : "Registrar Gasto"}
             </button>
           </form>

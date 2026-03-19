@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Spinner } from "@/components/ui/spinner"
-import { Eye, EyeOff, TrendingUp } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -59,8 +59,12 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
-            <TrendingUp className="w-7 h-7 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Minhas Finanças"
+              className="w-10 h-10 object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Criar Conta</h1>
           <p className="text-sm text-muted-foreground text-center">
@@ -77,7 +81,10 @@ export default function SignUpPage() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="name"
+              className="text-sm font-medium text-foreground"
+            >
               Nome
             </label>
             <input
@@ -92,7 +99,10 @@ export default function SignUpPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground"
+            >
               Email
             </label>
             <input
@@ -107,7 +117,10 @@ export default function SignUpPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-foreground"
+            >
               Senha
             </label>
             <div className="relative">
@@ -150,7 +163,10 @@ export default function SignUpPage() {
         {/* Login link */}
         <p className="text-center text-sm text-muted-foreground">
           Já tem uma conta?{" "}
-          <Link href="/auth/login" className="text-primary font-medium hover:underline">
+          <Link
+            href="/auth/login"
+            className="text-primary font-medium hover:underline"
+          >
             Entrar
           </Link>
         </p>

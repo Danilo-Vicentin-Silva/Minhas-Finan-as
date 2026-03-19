@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Spinner } from "@/components/ui/spinner"
-import { Eye, EyeOff, TrendingUp } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -27,9 +27,11 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message === "Invalid login credentials" 
-        ? "Email ou senha incorretos" 
-        : error.message)
+      setError(
+        error.message === "Invalid login credentials"
+          ? "Email ou senha incorretos"
+          : error.message,
+      )
       setLoading(false)
       return
     }
@@ -43,10 +45,16 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
-            <TrendingUp className="w-7 h-7 text-primary-foreground" />
+          <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Minhas Finanças"
+              className="w-16 h-16 object-contain rounded-2xl"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">FinanceApp</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Minhas Finanças
+          </h1>
           <p className="text-sm text-muted-foreground text-center">
             Entre para gerenciar suas finanças
           </p>
@@ -61,7 +69,10 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground"
+            >
               Email
             </label>
             <input
@@ -76,7 +87,10 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-foreground"
+            >
               Senha
             </label>
             <div className="relative">
@@ -118,7 +132,10 @@ export default function LoginPage() {
         {/* Sign up link */}
         <p className="text-center text-sm text-muted-foreground">
           Não tem uma conta?{" "}
-          <Link href="/auth/sign-up" className="text-primary font-medium hover:underline">
+          <Link
+            href="/auth/sign-up"
+            className="text-primary font-medium hover:underline"
+          >
             Criar conta
           </Link>
         </p>
