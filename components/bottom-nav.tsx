@@ -33,14 +33,14 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
               "flex-1 flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium transition-colors",
               active === tab.id
                 ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={active === tab.id ? "page" : undefined}
           >
             <span
               className={cn(
                 "transition-transform",
-                active === tab.id && "scale-110"
+                active === tab.id && "scale-110",
               )}
             >
               {tab.icon}
