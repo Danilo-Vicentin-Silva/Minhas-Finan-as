@@ -20,6 +20,7 @@ function FinanceApp() {
   const { isHydrated, isLoading, user, profile, setTheme, selectedMonth } =
     useFinance()
   const [activeTab, setActiveTab] = useState<TabId>("inicio")
+  const [hideValues, setHideValues] = useState(false)
 
   // Get darkMode from profile (Supabase) with fallback
   const darkMode = profile?.theme !== "light"
@@ -65,8 +66,11 @@ function FinanceApp() {
           {/* ── Início ──────────────────────────────────── */}
           {activeTab === "inicio" && (
             <div>
-              <DashboardHeader />
-              <IncomeSection />
+              <DashboardHeader
+                hideValues={hideValues}
+                onToggleHideValues={() => setHideValues((prev) => !prev)}
+              />
+              <IncomeSection hideValues={hideValues} />
             </div>
           )}
 

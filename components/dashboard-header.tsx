@@ -20,7 +20,12 @@ function formatCurrency(value: number) {
   }).format(value)
 }
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  hideValues: boolean
+  onToggleHideValues: () => void
+}
+
+export function DashboardHeader({ hideValues, onToggleHideValues }: DashboardHeaderProps) {
   const {
     balance,
     totalIncome,
@@ -30,7 +35,6 @@ export function DashboardHeader() {
     goToPreviousMonth,
     goToNextMonth,
   } = useFinance()
-  const [hideValues, setHideValues] = useState(false)
 
   const balancePositive = balance >= 0
 
@@ -74,7 +78,7 @@ export function DashboardHeader() {
           <h1 className="text-lg font-semibold text-foreground">Visão Geral</h1>
         </div>
         <button
-          onClick={() => setHideValues(!hideValues)}
+          onClick={onToggleHideValues}
           className="p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           aria-label={hideValues ? "Mostrar valores" : "Ocultar valores"}
         >
@@ -157,7 +161,11 @@ export function DashboardHeader() {
   )
 }
 
-export function IncomeSection() {
+interface IncomeSectionProps {
+  hideValues: boolean
+}
+
+export function IncomeSection({ hideValues }: IncomeSectionProps) {
   const { profile, setSalary, setInvestmentIncome } = useFinance()
   const salary = profile?.salary || 0
   const investmentIncome = profile?.investment_income || 0
@@ -207,7 +215,7 @@ export function IncomeSection() {
                   />
                 ) : (
                   <p className="text-sm font-semibold text-foreground">
-                    {formatCurrency(salary)}
+                    {hideValues ? "••••" : formatCurrency(salary)}
                   </p>
                 )}
               </div>
@@ -249,7 +257,7 @@ export function IncomeSection() {
                   />
                 ) : (
                   <p className="text-sm font-semibold text-foreground">
-                    {formatCurrency(investmentIncome)}
+                    {hideValues ? "••••" : formatCurrency(investmentIncome)}
                   </p>
                 )}
               </div>
