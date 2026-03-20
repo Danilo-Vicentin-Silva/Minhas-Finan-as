@@ -25,7 +25,10 @@ interface DashboardHeaderProps {
   onToggleHideValues: () => void
 }
 
-export function DashboardHeader({ hideValues, onToggleHideValues }: DashboardHeaderProps) {
+export function DashboardHeader({
+  hideValues,
+  onToggleHideValues,
+}: DashboardHeaderProps) {
   const {
     balance,
     totalIncome,
@@ -47,7 +50,7 @@ export function DashboardHeader({ hideValues, onToggleHideValues }: DashboardHea
   const hasNext = monthIndex >= 0 && monthIndex < availableMonths.length - 1
 
   return (
-    <div className="px-3 sm:px-4 pt-6 pb-4 space-y-5">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-6 pb-4 space-y-5">
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <div>
@@ -189,7 +192,7 @@ export function IncomeSection({ hideValues }: IncomeSectionProps) {
   }
 
   return (
-    <div className="px-3 sm:px-4 pb-4">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4">
       <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
         Entradas de Renda
       </h2>

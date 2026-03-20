@@ -20,7 +20,7 @@ interface BottomNavProps {
 export function BottomNav({ active, onChange }: BottomNavProps) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t border-border max-w-lg mx-auto"
+      className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t border-border max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto"
       role="navigation"
       aria-label="Navegação principal"
     >

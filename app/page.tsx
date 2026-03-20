@@ -60,7 +60,7 @@ function FinanceApp() {
   return (
     <div className={cn("min-h-screen bg-background", darkMode ? "dark" : "")}>
       {/* Constrained container — feels like a phone shell on desktop */}
-      <div className="relative max-w-lg mx-auto min-h-screen bg-background flex flex-col shadow-2xl">
+      <div className="relative max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto min-h-screen bg-background flex flex-col shadow-2xl">
         {/* Scrollable content */}
         <main className="flex-1 overflow-y-auto pb-20 no-scrollbar">
           {/* ── Início ──────────────────────────────────── */}
