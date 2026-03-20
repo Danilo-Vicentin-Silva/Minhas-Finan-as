@@ -82,6 +82,26 @@ export interface UserProfile {
   theme: "light" | "dark"
 }
 
+function getMonthKey(date: string | Date) {
+  const d =
+    typeof date === "string" ? new Date(`${date}T00:00:00`) : new Date(date)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+}
+
+function addMonthsToDate(date: Date, months: number) {
+  const baseDay = date.getDate()
+  const targetYear = date.getFullYear()
+  const targetMonth = date.getMonth() + months
+  const adjustedDate = new Date(targetYear, targetMonth, 1)
+  const daysInMonth = new Date(
+    adjustedDate.getFullYear(),
+    adjustedDate.getMonth() + 1,
+    0,
+  ).getDate()
+  adjustedDate.setDate(Math.min(baseDay, daysInMonth))
+  return adjustedDate
+}
+
 interface FinanceContextType {
   user: User | null
   profile: UserProfile | null
@@ -108,12 +128,20 @@ interface FinanceContextType {
   totalVariableExpenses: number
   totalExpenses: number
   balance: number
+  salary: number
+  investmentIncome: number
   expensesByCategory: {
     category: Category
     label: string
     amount: number
     color: string
   }[]
+  selectedMonth: Date
+  setSelectedMonth: (date: Date) => void
+  availableMonths: Date[]
+  goToPreviousMonth: () => void
+  goToNextMonth: () => void
+  filteredVariableExpenses: VariableExpense[]
   isHydrated: boolean
   isLoading: boolean
 }
@@ -127,6 +155,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [variableExpenses, setVariableExpenses] = useState<VariableExpense[]>(
     [],
   )
+  const [selectedMonth, setSelectedMonth] = useState<Date>(() => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), 1)
+  })
   const [isHydrated, setIsHydrated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -407,19 +439,25 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     ) => {
       if (!user) return
       const totalAmount = expense.amount
-      const installmentAmount =
-        Math.round((totalAmount / installments) * 100) / 100
+      const baseInstallmentAmount =
+        Math.floor((totalAmount * 100) / installments) / 100
+      const remainder = Number(
+        (totalAmount - baseInstallmentAmount * installments).toFixed(2),
+      )
       const baseDate = new Date(expense.date)
 
       const toInsert = []
       for (let i = 0; i < installments; i++) {
-        const installmentDate = new Date(baseDate)
-        installmentDate.setMonth(installmentDate.getMonth() + i)
+        const installmentDate = addMonthsToDate(baseDate, i)
+        const amount =
+          i === installments - 1
+            ? Number((baseInstallmentAmount + remainder).toFixed(2))
+            : baseInstallmentAmount
 
         toInsert.push({
           user_id: user.id,
           name: `${expense.name} (${i + 1}/${installments})`,
-          amount: installmentAmount,
+          amount,
           category: expense.category,
           date: installmentDate.toISOString().split("T")[0],
           description: expense.description || null,
@@ -500,14 +538,68 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     [profile],
   )
 
+  const selectedMonthKey = getMonthKey(selectedMonth)
+
+  const availableMonths = useMemo(() => {
+    const set = new Set<string>()
+    variableExpenses.forEach((e) => set.add(getMonthKey(e.date)))
+
+    const sorted = Array.from(set).sort()
+
+    return sorted.map((monthKey) => {
+      const [year, month] = monthKey.split("-").map(Number)
+      return new Date(year, month - 1, 1)
+    })
+  }, [variableExpenses, selectedMonthKey])
+
+  useEffect(() => {
+    if (availableMonths.length === 0) return
+
+    const selectedIndex = availableMonths.findIndex(
+      (m) =>
+        m.getFullYear() === selectedMonth.getFullYear() &&
+        m.getMonth() === selectedMonth.getMonth(),
+    )
+
+    if (selectedIndex === -1) {
+      setSelectedMonth(availableMonths[availableMonths.length - 1])
+    }
+  }, [availableMonths, selectedMonth])
+
+  const filteredVariableExpenses = useMemo(
+    () =>
+      variableExpenses.filter((e) => getMonthKey(e.date) === selectedMonthKey),
+    [variableExpenses, selectedMonthKey],
+  )
+
+  const goToPreviousMonth = useCallback(() => {
+    if (availableMonths.length === 0) return
+    const currentIndex = availableMonths.findIndex(
+      (m) => getMonthKey(m) === selectedMonthKey,
+    )
+    if (currentIndex > 0) {
+      setSelectedMonth(availableMonths[currentIndex - 1])
+    }
+  }, [availableMonths, selectedMonthKey])
+
+  const goToNextMonth = useCallback(() => {
+    if (availableMonths.length === 0) return
+    const currentIndex = availableMonths.findIndex(
+      (m) => getMonthKey(m) === selectedMonthKey,
+    )
+    if (currentIndex >= 0 && currentIndex < availableMonths.length - 1) {
+      setSelectedMonth(availableMonths[currentIndex + 1])
+    }
+  }, [availableMonths, selectedMonthKey])
+
   const totalFixedExpenses = useMemo(
     () => fixedExpenses.reduce((acc, e) => acc + e.amount, 0),
     [fixedExpenses],
   )
 
   const totalVariableExpenses = useMemo(
-    () => variableExpenses.reduce((acc, e) => acc + e.amount, 0),
-    [variableExpenses],
+    () => filteredVariableExpenses.reduce((acc, e) => acc + e.amount, 0),
+    [filteredVariableExpenses],
   )
 
   const totalExpenses = useMemo(
@@ -522,9 +614,13 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const expensesByCategory = useMemo(() => {
     const map = new Map<Category, number>()
-    for (const e of [...fixedExpenses, ...variableExpenses]) {
+    for (const e of fixedExpenses) {
       map.set(e.category, (map.get(e.category) ?? 0) + e.amount)
     }
+    for (const e of filteredVariableExpenses) {
+      map.set(e.category, (map.get(e.category) ?? 0) + e.amount)
+    }
+
     return Array.from(map.entries())
       .map(([category, amount]) => ({
         category,
@@ -533,7 +629,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         color: CATEGORIES[category].color,
       }))
       .sort((a, b) => b.amount - a.amount)
-  }, [fixedExpenses, variableExpenses])
+  }, [fixedExpenses, filteredVariableExpenses])
 
   return (
     <FinanceContext.Provider
@@ -555,11 +651,19 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setProfileName,
         setTheme,
         signOut,
+        selectedMonth,
+        setSelectedMonth,
+        availableMonths,
+        goToPreviousMonth,
+        goToNextMonth,
+        filteredVariableExpenses,
         totalIncome,
         totalFixedExpenses,
         totalVariableExpenses,
         totalExpenses,
         balance,
+        salary: profile?.salary || 0,
+        investmentIncome: profile?.investment_income || 0,
         expensesByCategory,
         isHydrated,
         isLoading,

@@ -320,7 +320,7 @@ function FixedExpenseItem({
 
 export function VariableExpensesSection() {
   const {
-    variableExpenses,
+    filteredVariableExpenses,
     totalVariableExpenses,
     removeVariableExpense,
     updateVariableExpense,
@@ -333,11 +333,11 @@ export function VariableExpensesSection() {
     "all",
   )
 
-  // Filter expenses by category
+  // Filter expenses by category and month
   const filteredExpenses =
     selectedCategory === "all"
-      ? variableExpenses
-      : variableExpenses.filter(
+      ? filteredVariableExpenses
+      : filteredVariableExpenses.filter(
           (expense) => expense.category === selectedCategory,
         )
 

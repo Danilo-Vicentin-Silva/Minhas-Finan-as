@@ -4,7 +4,11 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { FinanceProvider, useFinance } from "@/lib/finance-context"
 import { DashboardHeader, IncomeSection } from "@/components/dashboard-header"
-import { FixedExpensesSection, VariableExpensesSection, FABAddExpense } from "@/components/expenses-section"
+import {
+  FixedExpensesSection,
+  VariableExpensesSection,
+  FABAddExpense,
+} from "@/components/expenses-section"
 import { DonutChart, IncomeExpenseBarChart } from "@/components/charts-section"
 import { BottomNav, type TabId } from "@/components/bottom-nav"
 import { SettingsSection } from "@/components/settings-section"
@@ -13,7 +17,8 @@ import { Spinner } from "@/components/ui/spinner"
 
 function FinanceApp() {
   const router = useRouter()
-  const { isHydrated, isLoading, user, profile, setTheme } = useFinance()
+  const { isHydrated, isLoading, user, profile, setTheme, selectedMonth } =
+    useFinance()
   const [activeTab, setActiveTab] = useState<TabId>("inicio")
 
   // Get darkMode from profile (Supabase) with fallback
@@ -22,7 +27,10 @@ function FinanceApp() {
   // Apply theme class to document when profile loads
   useEffect(() => {
     if (profile) {
-      document.documentElement.classList.toggle("dark", profile.theme !== "light")
+      document.documentElement.classList.toggle(
+        "dark",
+        profile.theme !== "light",
+      )
     }
   }, [profile?.theme])
 
@@ -66,8 +74,15 @@ function FinanceApp() {
           {activeTab === "gastos" && (
             <div className="pt-6">
               <div className="px-3 sm:px-4 mb-4">
-                <h1 className="text-lg font-semibold text-foreground">Meus Gastos</h1>
-                <p className="text-sm text-muted-foreground">Março 2026</p>
+                <h1 className="text-lg font-semibold text-foreground">
+                  Meus Gastos
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedMonth.toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
               <FixedExpensesSection />
               <div className="border-t border-border my-2" />
@@ -79,8 +94,15 @@ function FinanceApp() {
           {activeTab === "graficos" && (
             <div className="pt-6">
               <div className="px-3 sm:px-4 mb-4">
-                <h1 className="text-lg font-semibold text-foreground">Visualizações</h1>
-                <p className="text-sm text-muted-foreground">Março 2026</p>
+                <h1 className="text-lg font-semibold text-foreground">
+                  Visualizações
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedMonth.toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
               <DonutChart />
               <div className="border-t border-border my-2" />
@@ -90,7 +112,10 @@ function FinanceApp() {
 
           {/* ── Configurações ───────────────────────────── */}
           {activeTab === "configuracoes" && (
-            <SettingsSection darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+            <SettingsSection
+              darkMode={darkMode}
+              onToggleDarkMode={handleToggleDarkMode}
+            />
           )}
         </main>
 
@@ -98,7 +123,9 @@ function FinanceApp() {
         <BottomNav active={activeTab} onChange={setActiveTab} />
 
         {/* FAB — only visible on gastos and inicio tabs */}
-        {(activeTab === "inicio" || activeTab === "gastos") && <FABAddExpense />}
+        {(activeTab === "inicio" || activeTab === "gastos") && (
+          <FABAddExpense />
+        )}
       </div>
     </div>
   )

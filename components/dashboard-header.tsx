@@ -1,7 +1,15 @@
 "use client"
 
 import { useFinance } from "@/lib/finance-context"
-import { TrendingUp, TrendingDown, Wallet, Eye, EyeOff } from "lucide-react"
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Eye,
+  EyeOff,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -13,17 +21,56 @@ function formatCurrency(value: number) {
 }
 
 export function DashboardHeader() {
-  const { balance, totalIncome, totalExpenses } = useFinance()
+  const {
+    balance,
+    totalIncome,
+    totalExpenses,
+    selectedMonth,
+    availableMonths,
+    goToPreviousMonth,
+    goToNextMonth,
+  } = useFinance()
   const [hideValues, setHideValues] = useState(false)
 
   const balancePositive = balance >= 0
+
+  const monthIndex = availableMonths.findIndex(
+    (m) =>
+      m.getFullYear() === selectedMonth.getFullYear() &&
+      m.getMonth() === selectedMonth.getMonth(),
+  )
+  const hasPrevious = monthIndex > 0
+  const hasNext = monthIndex >= 0 && monthIndex < availableMonths.length - 1
 
   return (
     <div className="px-3 sm:px-4 pt-6 pb-4 space-y-5">
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Março 2026</p>
+          <div className="flex items-center gap-2 mb-1">
+            <button
+              onClick={goToPreviousMonth}
+              disabled={!hasPrevious}
+              className="p-1 rounded-md border border-border text-muted-foreground disabled:opacity-40"
+              aria-label="Mês anterior"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <p className="text-sm text-muted-foreground">
+              {selectedMonth.toLocaleDateString("pt-BR", {
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            <button
+              onClick={goToNextMonth}
+              disabled={!hasNext}
+              className="p-1 rounded-md border border-border text-muted-foreground disabled:opacity-40"
+              aria-label="Próximo mês"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
           <h1 className="text-lg font-semibold text-foreground">Visão Geral</h1>
         </div>
         <button
@@ -41,13 +88,15 @@ export function DashboardHeader() {
         <p
           className={cn(
             "text-4xl font-bold tracking-tight",
-            balancePositive ? "text-primary" : "text-destructive"
+            balancePositive ? "text-primary" : "text-destructive",
           )}
         >
           {hideValues ? "R$ ••••••" : formatCurrency(balance)}
         </p>
         <p className="text-xs text-muted-foreground pt-1">
-          {balancePositive ? "Você está no positivo este mês" : "Atenção: despesas acima da receita"}
+          {balancePositive
+            ? "Você está no positivo este mês"
+            : "Atenção: despesas acima da receita"}
         </p>
       </div>
 
@@ -82,7 +131,10 @@ export function DashboardHeader() {
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Comprometido</span>
           <span>
-            {totalIncome > 0 ? Math.min(100, Math.round((totalExpenses / totalIncome) * 100)) : 0}%
+            {totalIncome > 0
+              ? Math.min(100, Math.round((totalExpenses / totalIncome) * 100))
+              : 0}
+            %
           </span>
         </div>
         <div className="h-2 rounded-full bg-secondary overflow-hidden">
@@ -92,8 +144,8 @@ export function DashboardHeader() {
               totalExpenses / totalIncome > 0.8
                 ? "bg-destructive"
                 : totalExpenses / totalIncome > 0.6
-                ? "bg-amber-500"
-                : "bg-primary"
+                  ? "bg-amber-500"
+                  : "bg-primary",
             )}
             style={{
               width: `${Math.min(100, (totalExpenses / totalIncome) * 100)}%`,
@@ -112,7 +164,9 @@ export function IncomeSection() {
   const [editingSalary, setEditingSalary] = useState(false)
   const [editingInvestment, setEditingInvestment] = useState(false)
   const [salaryInput, setSalaryInput] = useState(salary.toString())
-  const [investmentInput, setInvestmentInput] = useState(investmentIncome.toString())
+  const [investmentInput, setInvestmentInput] = useState(
+    investmentIncome.toString(),
+  )
 
   function handleSalarySave() {
     const parsed = parseFloat(salaryInput.replace(",", "."))
@@ -178,14 +232,18 @@ export function IncomeSection() {
                 <TrendingUp size={15} className="text-chart-2" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Rendimento de Investimentos</p>
+                <p className="text-xs text-muted-foreground">
+                  Rendimento de Investimentos
+                </p>
                 {editingInvestment ? (
                   <input
                     type="number"
                     value={investmentInput}
                     onChange={(e) => setInvestmentInput(e.target.value)}
                     onBlur={handleInvestmentSave}
-                    onKeyDown={(e) => e.key === "Enter" && handleInvestmentSave()}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleInvestmentSave()
+                    }
                     className="w-full bg-transparent text-sm font-semibold text-foreground outline-none border-b border-primary"
                     autoFocus
                   />
