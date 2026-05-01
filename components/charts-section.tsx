@@ -42,7 +42,7 @@ export function DonutChart() {
   }
 
   return (
-    <div className="px-3 sm:px-4 pb-4">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4">
       <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
         Despesas por Categoria
       </h2>
@@ -151,7 +151,7 @@ export function IncomeExpenseBarChart() {
   ]
 
   return (
-    <div className="px-3 sm:px-4 pb-4 space-y-4">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4 space-y-4">
       {/* Comparison bar */}
       <div className="rounded-2xl bg-card border border-border p-3 sm:p-4">
         <h3 className="text-sm font-semibold text-foreground mb-1">

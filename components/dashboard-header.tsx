@@ -1,7 +1,15 @@
 "use client"
 
 import { useFinance } from "@/lib/finance-context"
-import { TrendingUp, TrendingDown, Wallet, Eye, EyeOff } from "lucide-react"
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Eye,
+  EyeOff,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -12,22 +20,68 @@ function formatCurrency(value: number) {
   }).format(value)
 }
 
-export function DashboardHeader() {
-  const { balance, totalIncome, totalExpenses } = useFinance()
-  const [hideValues, setHideValues] = useState(false)
+interface DashboardHeaderProps {
+  hideValues: boolean
+  onToggleHideValues: () => void
+}
+
+export function DashboardHeader({
+  hideValues,
+  onToggleHideValues,
+}: DashboardHeaderProps) {
+  const {
+    balance,
+    totalIncome,
+    totalExpenses,
+    selectedMonth,
+    availableMonths,
+    goToPreviousMonth,
+    goToNextMonth,
+  } = useFinance()
 
   const balancePositive = balance >= 0
 
+  const monthIndex = availableMonths.findIndex(
+    (m) =>
+      m.getFullYear() === selectedMonth.getFullYear() &&
+      m.getMonth() === selectedMonth.getMonth(),
+  )
+  const hasPrevious = monthIndex > 0
+  const hasNext = monthIndex >= 0 && monthIndex < availableMonths.length - 1
+
   return (
-    <div className="px-3 sm:px-4 pt-6 pb-4 space-y-5">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-6 pb-4 space-y-5">
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Março 2026</p>
+          <div className="flex items-center gap-2 mb-1">
+            <button
+              onClick={goToPreviousMonth}
+              disabled={!hasPrevious}
+              className="p-1 rounded-md border border-border text-muted-foreground disabled:opacity-40"
+              aria-label="Mês anterior"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <p className="text-sm text-muted-foreground">
+              {selectedMonth.toLocaleDateString("pt-BR", {
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            <button
+              onClick={goToNextMonth}
+              disabled={!hasNext}
+              className="p-1 rounded-md border border-border text-muted-foreground disabled:opacity-40"
+              aria-label="Próximo mês"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
           <h1 className="text-lg font-semibold text-foreground">Visão Geral</h1>
         </div>
         <button
-          onClick={() => setHideValues(!hideValues)}
+          onClick={onToggleHideValues}
           className="p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           aria-label={hideValues ? "Mostrar valores" : "Ocultar valores"}
         >
@@ -41,13 +95,15 @@ export function DashboardHeader() {
         <p
           className={cn(
             "text-4xl font-bold tracking-tight",
-            balancePositive ? "text-primary" : "text-destructive"
+            balancePositive ? "text-primary" : "text-destructive",
           )}
         >
           {hideValues ? "R$ ••••••" : formatCurrency(balance)}
         </p>
         <p className="text-xs text-muted-foreground pt-1">
-          {balancePositive ? "Você está no positivo este mês" : "Atenção: despesas acima da receita"}
+          {balancePositive
+            ? "Você está no positivo este mês"
+            : "Atenção: despesas acima da receita"}
         </p>
       </div>
 
@@ -82,7 +138,10 @@ export function DashboardHeader() {
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Comprometido</span>
           <span>
-            {totalIncome > 0 ? Math.min(100, Math.round((totalExpenses / totalIncome) * 100)) : 0}%
+            {totalIncome > 0
+              ? Math.min(100, Math.round((totalExpenses / totalIncome) * 100))
+              : 0}
+            %
           </span>
         </div>
         <div className="h-2 rounded-full bg-secondary overflow-hidden">
@@ -92,8 +151,8 @@ export function DashboardHeader() {
               totalExpenses / totalIncome > 0.8
                 ? "bg-destructive"
                 : totalExpenses / totalIncome > 0.6
-                ? "bg-amber-500"
-                : "bg-primary"
+                  ? "bg-amber-500"
+                  : "bg-primary",
             )}
             style={{
               width: `${Math.min(100, (totalExpenses / totalIncome) * 100)}%`,
@@ -105,14 +164,20 @@ export function DashboardHeader() {
   )
 }
 
-export function IncomeSection() {
+interface IncomeSectionProps {
+  hideValues: boolean
+}
+
+export function IncomeSection({ hideValues }: IncomeSectionProps) {
   const { profile, setSalary, setInvestmentIncome } = useFinance()
   const salary = profile?.salary || 0
   const investmentIncome = profile?.investment_income || 0
   const [editingSalary, setEditingSalary] = useState(false)
   const [editingInvestment, setEditingInvestment] = useState(false)
   const [salaryInput, setSalaryInput] = useState(salary.toString())
-  const [investmentInput, setInvestmentInput] = useState(investmentIncome.toString())
+  const [investmentInput, setInvestmentInput] = useState(
+    investmentIncome.toString(),
+  )
 
   function handleSalarySave() {
     const parsed = parseFloat(salaryInput.replace(",", "."))
@@ -127,7 +192,7 @@ export function IncomeSection() {
   }
 
   return (
-    <div className="px-3 sm:px-4 pb-4">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4">
       <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
         Entradas de Renda
       </h2>
@@ -153,7 +218,7 @@ export function IncomeSection() {
                   />
                 ) : (
                   <p className="text-sm font-semibold text-foreground">
-                    {formatCurrency(salary)}
+                    {hideValues ? "••••" : formatCurrency(salary)}
                   </p>
                 )}
               </div>
@@ -178,20 +243,24 @@ export function IncomeSection() {
                 <TrendingUp size={15} className="text-chart-2" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Rendimento de Investimentos</p>
+                <p className="text-xs text-muted-foreground">
+                  Rendimento de Investimentos
+                </p>
                 {editingInvestment ? (
                   <input
                     type="number"
                     value={investmentInput}
                     onChange={(e) => setInvestmentInput(e.target.value)}
                     onBlur={handleInvestmentSave}
-                    onKeyDown={(e) => e.key === "Enter" && handleInvestmentSave()}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleInvestmentSave()
+                    }
                     className="w-full bg-transparent text-sm font-semibold text-foreground outline-none border-b border-primary"
                     autoFocus
                   />
                 ) : (
                   <p className="text-sm font-semibold text-foreground">
-                    {formatCurrency(investmentIncome)}
+                    {hideValues ? "••••" : formatCurrency(investmentIncome)}
                   </p>
                 )}
               </div>

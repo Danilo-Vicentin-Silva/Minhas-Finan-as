@@ -4,7 +4,11 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { FinanceProvider, useFinance } from "@/lib/finance-context"
 import { DashboardHeader, IncomeSection } from "@/components/dashboard-header"
-import { FixedExpensesSection, VariableExpensesSection, FABAddExpense } from "@/components/expenses-section"
+import {
+  FixedExpensesSection,
+  VariableExpensesSection,
+  FABAddExpense,
+} from "@/components/expenses-section"
 import { DonutChart, IncomeExpenseBarChart } from "@/components/charts-section"
 import { BottomNav, type TabId } from "@/components/bottom-nav"
 import { SettingsSection } from "@/components/settings-section"
@@ -13,8 +17,10 @@ import { Spinner } from "@/components/ui/spinner"
 
 function FinanceApp() {
   const router = useRouter()
-  const { isHydrated, isLoading, user, profile, setTheme } = useFinance()
+  const { isHydrated, isLoading, user, profile, setTheme, selectedMonth } =
+    useFinance()
   const [activeTab, setActiveTab] = useState<TabId>("inicio")
+  const [hideValues, setHideValues] = useState(false)
 
   // Get darkMode from profile (Supabase) with fallback
   const darkMode = profile?.theme !== "light"
@@ -22,7 +28,10 @@ function FinanceApp() {
   // Apply theme class to document when profile loads
   useEffect(() => {
     if (profile) {
-      document.documentElement.classList.toggle("dark", profile.theme !== "light")
+      document.documentElement.classList.toggle(
+        "dark",
+        profile.theme !== "light",
+      )
     }
   }, [profile?.theme])
 
@@ -51,14 +60,17 @@ function FinanceApp() {
   return (
     <div className={cn("min-h-screen bg-background", darkMode ? "dark" : "")}>
       {/* Constrained container — feels like a phone shell on desktop */}
-      <div className="relative max-w-lg mx-auto min-h-screen bg-background flex flex-col shadow-2xl">
+      <div className="relative max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto min-h-screen bg-background flex flex-col shadow-2xl">
         {/* Scrollable content */}
         <main className="flex-1 overflow-y-auto pb-20 no-scrollbar">
           {/* ── Início ──────────────────────────────────── */}
           {activeTab === "inicio" && (
             <div>
-              <DashboardHeader />
-              <IncomeSection />
+              <DashboardHeader
+                hideValues={hideValues}
+                onToggleHideValues={() => setHideValues((prev) => !prev)}
+              />
+              <IncomeSection hideValues={hideValues} />
             </div>
           )}
 
@@ -66,8 +78,15 @@ function FinanceApp() {
           {activeTab === "gastos" && (
             <div className="pt-6">
               <div className="px-3 sm:px-4 mb-4">
-                <h1 className="text-lg font-semibold text-foreground">Meus Gastos</h1>
-                <p className="text-sm text-muted-foreground">Março 2026</p>
+                <h1 className="text-lg font-semibold text-foreground">
+                  Meus Gastos
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedMonth.toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
               <FixedExpensesSection />
               <div className="border-t border-border my-2" />
@@ -79,8 +98,15 @@ function FinanceApp() {
           {activeTab === "graficos" && (
             <div className="pt-6">
               <div className="px-3 sm:px-4 mb-4">
-                <h1 className="text-lg font-semibold text-foreground">Visualizações</h1>
-                <p className="text-sm text-muted-foreground">Março 2026</p>
+                <h1 className="text-lg font-semibold text-foreground">
+                  Visualizações
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedMonth.toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
               <DonutChart />
               <div className="border-t border-border my-2" />
@@ -90,7 +116,10 @@ function FinanceApp() {
 
           {/* ── Configurações ───────────────────────────── */}
           {activeTab === "configuracoes" && (
-            <SettingsSection darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+            <SettingsSection
+              darkMode={darkMode}
+              onToggleDarkMode={handleToggleDarkMode}
+            />
           )}
         </main>
 
@@ -98,7 +127,9 @@ function FinanceApp() {
         <BottomNav active={activeTab} onChange={setActiveTab} />
 
         {/* FAB — only visible on gastos and inicio tabs */}
-        {(activeTab === "inicio" || activeTab === "gastos") && <FABAddExpense />}
+        {(activeTab === "inicio" || activeTab === "gastos") && (
+          <FABAddExpense />
+        )}
       </div>
     </div>
   )

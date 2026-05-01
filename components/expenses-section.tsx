@@ -118,7 +118,7 @@ export function FixedExpensesSection() {
   const paidCount = filteredExpenses.filter((e) => e.paid).length
 
   return (
-    <div className="px-3 sm:px-4 pb-4">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4">
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -320,7 +320,7 @@ function FixedExpenseItem({
 
 export function VariableExpensesSection() {
   const {
-    variableExpenses,
+    filteredVariableExpenses,
     totalVariableExpenses,
     removeVariableExpense,
     updateVariableExpense,
@@ -333,11 +333,11 @@ export function VariableExpensesSection() {
     "all",
   )
 
-  // Filter expenses by category
+  // Filter expenses by category and month
   const filteredExpenses =
     selectedCategory === "all"
-      ? variableExpenses
-      : variableExpenses.filter(
+      ? filteredVariableExpenses
+      : filteredVariableExpenses.filter(
           (expense) => expense.category === selectedCategory,
         )
 
@@ -345,7 +345,7 @@ export function VariableExpensesSection() {
   const displayed = expanded ? filteredExpenses : filteredExpenses.slice(0, 5)
 
   return (
-    <div className="px-3 sm:px-4 pb-4">
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4">
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -528,7 +528,7 @@ function EditVariableExpenseModal({
         className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 sm:p-6 max-w-lg mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 sm:p-6 max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-base font-semibold text-foreground">
             Editar Gasto
@@ -669,7 +669,7 @@ export function FABAddExpense() {
 
       {/* Sheet / Modal */}
       {open && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 sm:p-6 max-w-lg mx-auto">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 sm:p-6 max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-base font-semibold text-foreground">
               Registrar Gasto

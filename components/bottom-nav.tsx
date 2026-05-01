@@ -20,7 +20,7 @@ interface BottomNavProps {
 export function BottomNav({ active, onChange }: BottomNavProps) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t border-border max-w-lg mx-auto"
+      className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t border-border max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto"
       role="navigation"
       aria-label="Navegação principal"
     >
@@ -33,14 +33,14 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
               "flex-1 flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium transition-colors",
               active === tab.id
                 ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={active === tab.id ? "page" : undefined}
           >
             <span
               className={cn(
                 "transition-transform",
-                active === tab.id && "scale-110"
+                active === tab.id && "scale-110",
               )}
             >
               {tab.icon}
