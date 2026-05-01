@@ -1,0 +1,10 @@
+{
+  "cron": {
+    "jobs": [
+      {
+        "path": "/api/keep-alive",
+        "schedule": "0 */6 * * *"
+      }
+    ]
+  }
+}
