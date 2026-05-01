@@ -11,7 +11,7 @@ const _geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Minhas Finanças - Gestão Financeira Pessoal",
   description:
-    "Gerencie suas finanças pessoais com facilidade. Controle gastos, receitas e investimentos em um só lugar.",
+    "Gerencie suas finanças pessoais com facilidade. Controle gastos, receitas e investimentos em um só aplicativo.",
   generator: "v0.app",
   icons: {
     icon: [
