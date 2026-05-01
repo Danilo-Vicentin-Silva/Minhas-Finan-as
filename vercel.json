@@ -1,10 +1,8 @@
 {
-  "cron": {
-    "jobs": [
-      {
-        "path": "/api/keep-alive",
-        "schedule": "0 */6 * * *"
-      }
-    ]
-  }
+  "crons": [
+    {
+      "path": "/api/keep-alive",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 }
